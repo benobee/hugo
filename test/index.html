@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/bundle.css">
+<title>ITEMS</title>
+<style type="text/css">
+	@keyframes spin {
+		0% {
+			opacity:1;
+		}
+		15% {
+			transform:rotate3d(0,0,1,0deg) translate3d(0,100px,0) scale3d(0.5, 0.5, 0);
+			opacity:0.8;
+		}
+		85%{
+			transform: rotate3d(0,0,1,360deg) translate3d(0,-50px,0) scale3d(1.9, 1.9, 0);
+			opacity:0.1;
+		}
+		99% {
+			background-color:green;
+			opacity:0.2;
+		}
+		100% {
+			opacity:0.5;
+			background-color:green;
+		}
+	}
+
+	@keyframes pulse {
+		from {
+			background-color:antiqueWhite;
+		}
+		to{
+			background-color:firebrick;
+		}
+	}
+	@keyframes pulseInverse {
+		from {
+			background-color:firebrick;
+		}
+		to{
+			background-color:DARKCYAN;			
+		}
+	}
+	body{
+		margin:0;
+		height:300vh;
+	}
+	*{
+		font-family: 'Open Sans', sans-serif !important;
+	}
+	#page{
+		max-width:100%;
+		margin:0 auto;
+		height:300vh;
+	}
+	.boxes{
+		height:200px;
+		background:red;
+		display:flex;
+		align-items:center;
+		background:none;
+		margin:0 auto;
+		flex-wrap:wrap;
+		justify-content: center;
+		opacity:0.6;
+		animation:pulse 10s alternate ease-in-out infinite; 
+	}	
+	.box{
+		height:40px;
+		width:40px;
+		border:2px solid #e5e5e5;
+		background:none;
+		transition:1.5s;
+		border-radius:50%;
+		background-color:antiqueWhite;
+		animation:pulseInverse 10s alternate ease-in-out infinite; 
+	}
+	.fly{
+		background:#11fffb;
+		animation:spin 0.5s alternate ease-in-out infinite; 
+	}
+	.color-change{
+		border:1px solid red;
+		background:red;
+		filter:blur(8px);
+	}
+</style>
+</head>
+<body class="view-list collection-type-blog">
+<main id="collection-591a2a6b579fb30e8c3d8256">
+	<div class="boxes" class="sqs-col-3"></div>
+</main>
+<script src="/bundle.js"></script>
+</body>
+</html>

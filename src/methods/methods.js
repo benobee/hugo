@@ -108,10 +108,10 @@ const methods = {
             const form = $("#footerBlocksTop .form-block");
 
             $(".modal-wrapper .modal-content").append(form);
-            const title = $(".ProductItem-details-title").html();
+            const title = document.querySelector(".ProductItem-details-title");
 
-            $("input[name='SQF_PRODUCT_TITLE']").val(title);
-            $("textarea").val(title);
+            $("input[name='SQF_PRODUCT_TITLE']").val(title.innerText);
+            $("textarea").val(title.innerText);
             $(".modal-wrapper").addClass("active");
         });
 

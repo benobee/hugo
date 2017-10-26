@@ -117,10 +117,10 @@ var methods = {
             var form = (0, _jquery2.default)("#footerBlocksTop .form-block");
 
             (0, _jquery2.default)(".modal-wrapper .modal-content").append(form);
-            var title = (0, _jquery2.default)(".ProductItem-details-title").html();
+            var title = document.querySelector(".ProductItem-details-title");
 
-            (0, _jquery2.default)("input[name='SQF_PRODUCT_TITLE']").val(title);
-            (0, _jquery2.default)("textarea").val(title);
+            (0, _jquery2.default)("input[name='SQF_PRODUCT_TITLE']").val(title.innerText);
+            (0, _jquery2.default)("textarea").val(title.innerText);
             (0, _jquery2.default)(".modal-wrapper").addClass("active");
         });
 

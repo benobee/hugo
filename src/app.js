@@ -22,8 +22,6 @@ const App = {
 
         /* side bar links for each category navigation */
         this.blogPage();
-
-        console.log("DIST RUNNING");
     }
 };
 

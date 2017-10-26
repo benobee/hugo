@@ -4,20 +4,12 @@
 
 const webpack = require("webpack");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
-const path = require('path');
 
 /****************************************/
 /*******     CONFIG OBJECT      *********/
 /****************************************/
 
 const WEBPACK_CONFIG = { module: {} };
-
-/****************************************/
-/*******       VARIABLES        *********/
-/****************************************/
-
-const inputName = "main";
-const outputName = "bundle";
 
 /****************************************/
 /*******      ENVRIONMENTS      *********/
@@ -28,19 +20,16 @@ const outputName = "bundle";
  * production using "npm run build" from
  * the terminal. If true, file names will
  * be hashed, js will be minified.
-*/
+ */
 
-if (process.env.PROD_ENV === 'true') {
-    const isProduction = true;
-}
+const isProduction = JSON.parse(process.env.PROD_ENV ? true : false);
 
 /***************************************/
 /*********       INPUT        **********/
 /***************************************/
-
 const input = {
     context: __dirname,
-    entry: [ `./src/${ inputName }.js`, `./src/${ inputName }.less`],
+    entry: ['./main.js', './main.less'],
     devtool: isProduction ? '' : 'eval',
     node: {
         dns: 'mock',
@@ -49,8 +38,9 @@ const input = {
     },
     resolve: {
         alias: {
-          'masonry': 'masonry-layout',
-          'isotope': 'isotope-layout'
+            'masonry': 'masonry-layout',
+            'isotope': 'isotope-layout',
+            'vue': 'vue/dist/vue.min.js'
         }
     }
 };
@@ -65,50 +55,52 @@ Object.assign(WEBPACK_CONFIG, input);
 /*
  * each loader will push to this rules
  * array then added to WEBPACK_CONFIG.
-*/
+ */
 
 const rules = [];
 
 /*********************/
-
-// @rule: ES Lint
-
-const eslint = {
-    test: /\.js$/,
+// @rule: JS
+const JSRules = {
     enforce: 'pre',
-    loader: 'eslint-loader',
-    options: {
-      emitWarning: true,
-    }
+    test: /\.js$/,
+    exclude: /node_modules/,
+    use: [
+        "babel-loader",
+        {
+            loader: "eslint-loader",
+            options: {
+                emitWarning: true,
+                fix: true
+            }
+        },
+    ]
 };
 
-rules.push(eslint);
+rules.push(JSRules);
 
-// @rule: Babel
-const babel = {
-    test: /\.js$/,
-    include: path.resolve(__dirname, 'src'),
-    exclude: /node_modules/,
+//@rule: Vue
+const vueRules = {
+    test: /\.vue$/,
     use: [{
-        loader: 'babel-loader',
-            options: {
-              presets: [
-                ['es2015', { modules: false }]
-            ]   
+        loader: 'vue-loader',
+        options: {
+            extractCSS: true
         }
     }]
-};
+}
 
-rules.push(babel);
+rules.push(vueRules);
+
+/*********************/
 
 // @rule: extract all less, compile and apply post css prefixing
-const lessLoader = {
-    test: /\.less$/, 
+const lessRules = {
+    test: /\.less$/,
     exclude: /node_modules/,
     use: ExtractTextPlugin.extract({
         fallback: 'style-loader',
-        loader: [
-            {
+        use: [{
                 loader: 'css-loader',
             },
             {
@@ -121,32 +113,34 @@ const lessLoader = {
     })
 };
 
-rules.push(lessLoader);
+rules.push(lessRules);
+
+/*********************/
 
 // @rule: css autoprefixer
-const postCSSLoader = {
+const CSSRules = {
     test: /\.css$/,
     use: [
-      'style-loader',
-      {
-        loader: 'postcss-loader',
-      }
-    ]
-};
-
-rules.push(postCSSLoader);
-
-// @rule: json
-const jsonLoader = { 
-    test: /\.json$/,
-    use: [
+        'style-loader',
         {
-            loader: "json-loader",
+            loader: 'postcss-loader',
         }
     ]
 };
 
-rules.push(jsonLoader);
+rules.push(CSSRules);
+
+/*********************/
+
+// @rule: json
+const JSONRules = {
+    test: /\.json$/,
+    use: "json-loader"
+};
+
+rules.push(JSONRules);
+
+/*********************/
 
 WEBPACK_CONFIG.module.rules = rules;
 
@@ -158,7 +152,7 @@ WEBPACK_CONFIG.module.rules = rules;
  * each plugin will push to this plugins
  * array. Some will only be pushed when
  * config is set to production. 
-*/
+ */
 
 const plugins = [];
 
@@ -166,33 +160,18 @@ const plugins = [];
 
 // @plugin: node env
 const nodeENV = new webpack.DefinePlugin({
-  'process.env': {
-    NODE_ENV: JSON.stringify('production')
-  }
+    'process.env': {
+        NODE_ENV: JSON.stringify('production')
+    }
 });
 
 isProduction ? plugins.push(nodeENV) : false;
 
 /*****************************/
 
-// @plugin: es6 linting loader
-const loaderOptions = new webpack.LoaderOptionsPlugin({
-  test: /.js$/,
-  exclude: /node_modules/,
-  use: [
-    {
-        loader: "eslint-loader"
-    }
-  ]
-});
-
-plugins.push(loaderOptions);
-
-/**********************/
-
 // @plugin: compile all less files into master CSS
-const CSSBundle = new ExtractTextPlugin({ 
-    filename: isProduction ? `${ outputName }.min.css` : `${ outputName }.css`
+const CSSBundle = new ExtractTextPlugin({
+    filename: "bundle.css"
 });
 
 plugins.push(CSSBundle);
@@ -212,7 +191,7 @@ plugins.push(jQueryExtend);
 
 // @plugin: handling es6 promises
 const promises = new webpack.ProvidePlugin({
-    'Promise': 'es6-promise', 
+    'Promise': 'es6-promise',
     'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
 });
 
@@ -230,27 +209,33 @@ postCSS.forEach((item) => {
 });
 
 /*********************/
+//@plugin: Vue components
+const vueComponents = new webpack.DefinePlugin({
+    'process.env': {
+        NODE_ENV: '"production"'
+    }
+})
+
+if (isProduction) {
+    plugins.push(vueComponents);
+}
 
 // @plugin: for minifying javascript
 const minify = new webpack.optimize.UglifyJsPlugin({
-    compress: { 
-        warnings: false 
+    compress: {
+        warnings: false
     },
     output: {
-        comments: false
+        comments: isProduction ? false : true,
     },
-    minimize: true,
-    debug: true,
+    minimize: isProduction ? true : false,
+    debug: false,
     sourceMap: true,
-    minify: true,
+    minify: isProduction ? true : false,
 });
 
-
 //if production is set, js will be minified
-
-if (isProduction) {
-    plugins.push(minify);
-}
+plugins.push(minify);
 
 //output to config object
 WEBPACK_CONFIG.plugins = plugins;
@@ -260,9 +245,9 @@ WEBPACK_CONFIG.plugins = plugins;
 /************************************/
 const output = {
     output: {
-          publicPath: '/',
-          path: __dirname + "/dist",
-          filename: isProduction ? `${ outputName }.min.js` : `${ outputName }.js`
+        publicPath: '/',
+        path: __dirname + "/template/assets",
+        filename: "bundle.js"
     }
 };
 

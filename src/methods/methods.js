@@ -101,7 +101,7 @@ const methods = {
     productModalForm () {
         //replace product button - click product action button
         //to bring up enquire modal
-        $(".sqs-add-to-cart-button").after("<div class='button product-action'>Enquire</div>");
+        $(".ProductItem-details").after("<div class='button product-action'>Enquire</div>");
 
         $(".product-action").on("click", () => {
 
